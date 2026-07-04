@@ -120,6 +120,26 @@ expanded modern pool. Sinnoh encounter data exists in `data/encounters/`.
 - Ground-truth capture exists via the emulator (`emulator.html` DS touch works;
   Frame→Shot→Repo captures the real bottom screen).
 
+### Ground-truth capture — how "exact" is ENFORCED (the emulator bin-dump pipeline)
+This is the backbone of the sacred rule. We do not eyeball fidelity; we measure
+it against the live game. Built in `Pokemon-Game` (`emulator.html` +
+`emulator-debug.js`, builds 55→63; `docs/DS_HEAP_REGIONS.md`):
+- A DS screen is composited from **three memory layers**: **palette RAM**
+  (colors), **VRAM** (BG tilemaps + tile gfx), **OAM** (sprite cells). A frame
+  PNG alone can't be rebuilt exactly — we need those layers.
+- **SOLVED:** all three are contiguous fields of one desmume2015 `MMU_struct` in
+  the Emscripten heap. Live-anchor the **palette** by color-signature scan, then
+  `VRAM = palette+0x800` (len 0xA4000), `OAM = palette+0xC4800` (len 0x800).
+  Verified byte-exact against a full 184 MB Platinum heap dump.
+- **`⛁ Drive` button** (build 62): a full heap dump exceeds GitHub's 100 MB cap,
+  so it resumable-uploads to the user's Google Drive; we pull it and map all DS
+  regions offline in one pass.
+- **The verification loop for every screen:** open the real Platinum screen in
+  the emulator → auto-capture dumps frame + palette + VRAM + OAM (same seq #) →
+  reconstruct the screen from the game's own layers/NARC assets → **pixel-diff
+  vs the captured frame → fix → repeat until diff == 0.** This is the only
+  acceptable definition of "exact." Already proven on the party screen.
+
 ### Other reference implementations to mine (look, don't merge)
 - **`crater.html` + `src/crater/`** — a full turn-based battle/catch/party/box/
   dex/gym engine (DOM), engine-agnostic modules reusable for battle logic.
