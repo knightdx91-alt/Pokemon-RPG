@@ -6,20 +6,20 @@
  * src/applications/title_screen.c). No cropping, recolouring, or eyeballed
  * positioning.
  *
- * Verified against src/applications/title_screen.c, the on-screen architecture
- * of the TITLE is:
- *   - TOP (main) screen : Giratina (animated 3D) + the copyright line (BG1)
- *   - BOTTOM (sub) screen: Pokémon Platinum logo (BG2/3) + PRESS START (BG0)
+ * TITLE architecture (title_screen.c sets whichScreenIs3D = DS_SCREEN_SUB then
+ * GXLayers_SwapDisplay() -> GX_DISP_SELECT_SUB_MAIN, so the SUB engine drives
+ * the TOP LCD and the MAIN engine drives the BOTTOM LCD):
+ *   - TOP (sub engine)  : Pokémon Platinum logo + PRESS START + borders
+ *   - BOTTOM (main eng.) : Giratina (animated 3D) + the copyright line (BG1)
  *
- * What is EXACT and shown now: the opening frames (GAME FREAK / copyright) and
- * the title logo on the bottom screen.
+ * What is EXACT and shown now: the title logo on the TOP screen.
  *
  * What is NOT done yet and is therefore NOT faked (left blank rather than
  * approximated, per the exact-graphics rule):
- *   - the animated 3D Giratina on the title top screen (needs the NSBMD/NSBCA
- *     model port), and
- *   - the PRESS START graphic (needs extraction from the title NARC / font).
- * These will be added from ground truth, not drawn by hand.
+ *   - the animated 3D Giratina on the title BOTTOM screen (NSBMD/NSBCA port),
+ *   - the PRESS START graphic and the top/bottom screen borders, and
+ *   - the exact opening sequence/order (NOT yet traced from the state machine;
+ *     the frames below are shown in an unverified order pending heap-diff).
  *
  * Frame HOLD durations below are placeholder timings (behaviour, not graphics);
  * exact frame counts will be ported from the title_screen.c state machine.
@@ -54,13 +54,13 @@
   var titleReady = false;
 
   function showTitle() {
-    // Bottom (sub) screen: exact Pokémon Platinum logo. PRESS START graphic is
-    // pending exact extraction, so it is intentionally absent (not faked).
-    setBottom("logo");
-    // Top (main) screen: reserved for the animated 3D Giratina — left blank
-    // until the model is ported, rather than approximated.
-    setTop("");
+    // TOP screen (sub engine): exact Pokémon Platinum logo. PRESS START and the
+    // borders are pending exact extraction, so they are intentionally absent.
+    setTop("logo");
     top.classList.remove("fade", "hidden");
+    // BOTTOM screen (main engine): the animated 3D Giratina + copyright line —
+    // left blank until ported, rather than approximated.
+    setBottom("");
     titleReady = true;
   }
 
