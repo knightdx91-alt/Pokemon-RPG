@@ -94,19 +94,21 @@ Verified, numerically-checked C++ + data in `Pokemon-Game/decomp/`:
 - **CoreParam** (encrypted mon blob) decompiled + validated; **save system**
   fully mapped (39/39 blocks named).
 
-**Battle-engine gaps to flag now (so we can fix before wiring):**
-- This is Gen-7 (USUM) battle logic/data. Platinum is **Gen-4**. Decision needed:
-  do we run **Gen-4 mechanics** (Physical/Special split is already Gen-4; but
-  abilities, move data, type chart differ — Gen-4 has no Fairy type, different
-  move powers/effects, different catch/exp constants) or accept **Gen-7
-  mechanics under a Platinum skin**? For "exactly like Platinum" the *battle math
-  and data should be Gen-4*. The USUM decomp gives us a proven, verifiable engine
-  *architecture* and a full data schema — we likely need a **Gen-4 data set**
-  (pokeplatinum personal/moves/learnsets) fed through the same engine shape, and
-  a Gen-4 type chart (17×17, no Fairy). **This is the first thing to resolve
-  with the user before building battles.**
-- No Gen-4 wild-encounter tables wired into the new engine yet (Sinnoh encounter
-  data exists in `data/encounters/`).
+**DECIDED: use the USUM (Gen-7) engine as-is — "Gen-7 mechanics under a Platinum
+skin."** The game *looks* exactly like Platinum, but the battle math/data is the
+modern, already-verified Ultra Moon ruleset. This is the "updated stuff" and
+avoids maintaining a second Gen-4 data fork. Consequences we accept:
+- **Fairy type exists**, 807 species, modern move/ability/weather/terrain data.
+  Physical/Special split is unchanged (Gen 4 already had it).
+- **The only visible "tell":** the Platinum UI must now be able to display a
+  **Fairy type** (Platinum never had one) — so we produce/extract a
+  **Platinum-style Fairy type icon**. This is the single place the skin gets
+  extended; it does not violate the sacred rule.
+- Species beyond #493 and modern numbers can appear — fine and intended.
+
+**Still to decide later (not blocking):** which **encounter tables** each Sinnoh
+route uses — Platinum's original wild lists (authentic Sinnoh feel) vs. an
+expanded modern pool. Sinnoh encounter data exists in `data/encounters/`.
 
 ### UI extraction — the "exact Platinum" pipeline (in progress)
 - **`tools/extract_platinum_ui.py`** — exact DS 2D UI decoder (NCLR/NCGR/NSCR).
@@ -150,18 +152,22 @@ Verified, numerically-checked C++ + data in `Pokemon-Game/decomp/`:
 - **Save:** localStorage for single-player now; design the save schema so it can
   sync to a server later (multiplayer prep).
 
-## Open decisions to settle with the user before any building
+## Decisions locked
 
-1. **Which repo is the game's home?** This plan is committed to
-   `knightdx91-alt/Pokemon-RPG` (main). Confirm the actual game code also lives
-   here vs. continuing inside Pokemon-Game.
-2. **Gen-4 vs Gen-7 battle mechanics** (see battle-engine gaps). For "exactly
-   like Platinum," Gen-4 data + a 17-type chart is the faithful answer — confirm,
-   and if so we pull Gen-4 data from `pret/pokeplatinum` through the engine.
-3. **3D fidelity target for movement/camera:** fixed DS camera angle vs. a small
+- **Repo home:** `knightdx91-alt/Pokemon-RPG`, branch `main`. All game code AND
+  any assets we end up using live here. (Shared extraction tools/decomp can be
+  copied/vendored in from Pokemon-Game as needed.)
+- **Battle engine:** USUM (Gen-7) as-is — Gen-7 mechanics under a Platinum skin
+  (see above). Add a Platinum-style Fairy type icon.
+
+## Open decisions to settle before the relevant stage (not blocking Sinnoh start)
+
+1. **3D fidelity target for movement/camera:** fixed DS camera angle vs. a small
    set of snap angles. (Free orbit is ruled out — DS assets have low-detail back
    faces.)
-4. **Omega Ruby (Hoenn 3D):** user still needs to back up the ROM to Drive.
+2. **Sinnoh encounter tables:** authentic Platinum wild lists vs. expanded modern
+   pool (only matters once wild encounters are wired).
+3. **Omega Ruby (Hoenn 3D):** user still needs to back up the ROM to Drive.
    Sinnoh/Johto/Kanto 3D assets are already obtainable; Hoenn 3D waits on that.
 
 ## Milestones (Sinnoh vertical slice = Definition of Done for stage 1)
