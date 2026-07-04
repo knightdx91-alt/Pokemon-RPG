@@ -29,9 +29,16 @@ exactly right.
 
 ## Build order (do not reorder)
 
-1. **Sinnoh first.** Get one region fully playable, in 3D with a 2D toggle,
-   with the exact Platinum UI. This is the vertical slice that proves the whole
-   stack.
+0. **The boot experience FIRST.** Before any overworld/battle work, the game's
+   **loading screen and the New Game intro must be exact Platinum** — the DS
+   boot/copyright screens (as a placeholder loading screen for now is fine, but
+   styled exactly Platinum), the Platinum title sequence, and Professor Rowan's
+   new-game intro (his narration, the Turtwig/Chimchar/Piplup era intro flow,
+   name entry, gender select) — pixel- and flow-identical. This is the first
+   thing the user sees, so it is the first thing we make exact.
+1. **Sinnoh first.** Get one region fully playable, in 3D with a **prominent,
+   always-available 2D toggle**, with the exact Platinum UI. This is the
+   vertical slice that proves the whole stack.
 2. Then the rest of the **first four regions**: Kanto, Johto, Hoenn.
 3. Then regions **5–7**: Unova, Kalos, Alola.
 4. Only after single-player is exactly right: **multiplayer** + extra features.
@@ -194,8 +201,12 @@ it against the live game. Built in `Pokemon-Game` (`emulator.html` +
   - **2D:** the pre-baked top-down textured PNG per map (already produced by
     `render_platinum_maps.py`) drawn on canvas — exactly the `unleashed.html`
     toggle model, scaled to every Sinnoh map.
-  - A single **2D/3D toggle button** swaps which renderer is active; collision,
-    warps, NPCs, and game state are shared and identical in both.
+  - **The 2D/3D toggle is a PROMINENT, first-class, always-available control**
+    (not buried in a menu) — the player can flip back and forth freely at any
+    time during overworld play, instantly, staying on the exact same tile with
+    the same game state. Both renderers share one collision/warp/NPC/state model,
+    so nothing changes but the visuals. This is a headline feature, treat it as
+    such in the UI. (Prototyped as the `#b3d`/`#b2d` toggle in `unleashed.html`.)
 - **UI layer:** a faithful **two-screen 256×192** Platinum shell (top = overworld,
   bottom = Poketch/menus), integer-scaled, using **only ROM-extracted assets**
   and the exact Platinum font. Every menu built via the extract→composite→
@@ -223,9 +234,40 @@ it against the live game. Built in `Pokemon-Game` (`emulator.html` +
 3. **Omega Ruby (Hoenn 3D):** user still needs to back up the ROM to Drive.
    Sinnoh/Johto/Kanto 3D assets are already obtainable; Hoenn 3D waits on that.
 
+## Known issues to fix (carried over from prototypes)
+
+### 3D building rendering — see-through faces + sub-DS quality (New Bark, Johto)
+Observed in the 3D prototype: New Bark Town buildings rendered wrong — **parts
+were see-through even from the front**, and overall quality looked **worse than
+the real DS**. Root-cause candidates to work through (in likely order):
+- **Transparency / alpha handling:** the prototype materials use
+  `transparent:true` + `alphaTest` + `depthWrite:false` on some meshes. Wrong
+  alphaTest or a texture whose transparent color key is mis-detected will punch
+  holes in solid walls. Fix: only building **billboard/foliage** planes should be
+  alpha-tested; solid building geometry must be **opaque with depth-write on**.
+- **Backface culling / winding:** everything was forced `THREE.DoubleSide`. DS
+  models rely on correct per-polygon culling; double-siding some faces + wrong
+  draw order makes interior/back polys show through the front. Respect the
+  model's real face-culling flags from the NSBMD material instead of blanket
+  double-siding.
+- **Depth sorting:** disabling `depthWrite` on opaque meshes lets far faces paint
+  over near ones — the classic "see-through from the front." Keep real depth
+  buffering for solid geometry.
+- **Quality gap vs DS:** likely (a) texture filtering/wrap not matching the DS
+  (DS uses nearest + specific S/T wrap+flip per material — must read the NSBMD
+  tex params, not assume), (b) missing DS toon/vertex lighting, (c) low bake/
+  render resolution. Match the DS material params from `nitro_g3d.py` output.
+- **Correct reference:** the Nuvema Town (Unova) render came out **pixel-real**
+  through the same rasterizer, so the pipeline is capable — New Bark's breakage
+  is a per-model material/culling handling gap, not a fundamental limitation.
+
 ## Milestones (Sinnoh vertical slice = Definition of Done for stage 1)
 
+- [ ] **Boot + New Game are exact Platinum FIRST** — loading screen, title
+      sequence, Prof. Rowan intro, name/gender entry, flow into the world.
 - [ ] Walk a real Sinnoh map (Twinleaf/Sandgem/Route 201/Jubilife) in 3D.
+- [ ] The prominent 2D/3D toggle flips freely back and forth mid-play, no state loss.
+- [ ] 3D buildings render solid (no see-through faces) at DS-match quality.
 - [ ] 2D/3D toggle button flips the same map, same position, instantly.
 - [ ] Cross every Sinnoh map boundary with **zero transition/loading screens** —
       walk continues uninterrupted (seamless prefetch, no black frames).
