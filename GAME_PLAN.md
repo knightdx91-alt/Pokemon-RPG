@@ -19,7 +19,8 @@ Everything else in this document is negotiable. This rule is not.
 
 A browser-based Pokémon game, hosted on **GitHub Pages**, covering **regions
 1–7** (Kanto, Johto, Hoenn, Sinnoh, Unova, Kalos, Alola). You walk the real
-maps in **3D** (DS/3DS-style), with a **button to toggle to 2D**. It plays like
+maps in **3D** (DS/3DS-style), with a **button to toggle to 2D**, as **one
+seamless world with zero transition/loading screens** between maps. It plays like
 **Pokémon Platinum with the other regions bolted on** — the full Platinum
 feature set, UI, and feel. Single-player first, done to the "exact Platinum"
 bar above. **Then** it becomes multiplayer with additional features. We do not
@@ -120,6 +121,38 @@ expanded modern pool. Sinnoh encounter data exists in `data/encounters/`.
 - Ground-truth capture exists via the emulator (`emulator.html` DS touch works;
   Frame→Shot→Repo captures the real bottom screen).
 
+### Seamless world — ZERO transition screens (non-negotiable, already built)
+**Hard requirement:** every overworld map connects seamlessly. **No black
+screens, no "loading", no transition wipes** when crossing between maps — you
+just keep walking and the next area is already there. This is second only to the
+sacred Platinum-look rule.
+
+Already implemented in `Pokemon-Game` (`src/main.js` + `src/engine/map.js`),
+port it into this repo:
+- `seamlessConnectionStep()` (GBA-style edge connections) and
+  `seamlessMatrixStep()` (DS matrix seams) **prefetch neighbor maps** and step
+  the player across the seam by shifting into the new map's local frame
+  **mid-walk**, so the walk interpolation continues with no black screen.
+  `switchToNeighbor()` / `switchToMap()` do the frame swap.
+- The async `transitionToConnection()` / `transitionToMatrix()` exist ONLY as a
+  fallback for the first few frames before prefetch completes — the goal is that
+  prefetch always wins so the fallback never shows.
+
+**Extension work (not invention):**
+- Widen prefetch from immediate neighbors to a **ring** (keep the player's chunk
+  + all chunks within N tiles loaded) so fast movement never outruns prefetch.
+- **Regions connect via land bridges / sea routes authored as normal connected
+  maps** — "walk from Sinnoh to Johto" is just more chunks streaming in, no
+  special-casing, no region-select screen.
+- **Interiors** (buildings, caves) may stay as discrete door-fade loads — that's
+  fine and matches the real games; only the **overworld must be seamless**.
+- Keep movement **tile-locked and state serializable** so it ports cleanly to the
+  later multiplayer server.
+
+*(Full prior write-up: `Pokemon-Game/docs/OPEN_WORLD_PLAN.md` — an "OSRS but
+Pokémon" seamless 7-region world; multiplayer is its final phase, matching our
+build order.)*
+
 ### Ground-truth capture — how "exact" is ENFORCED (the emulator bin-dump pipeline)
 This is the backbone of the sacred rule. We do not eyeball fidelity; we measure
 it against the live game. Built in `Pokemon-Game` (`emulator.html` +
@@ -194,6 +227,8 @@ it against the live game. Built in `Pokemon-Game` (`emulator.html` +
 
 - [ ] Walk a real Sinnoh map (Twinleaf/Sandgem/Route 201/Jubilife) in 3D.
 - [ ] 2D/3D toggle button flips the same map, same position, instantly.
+- [ ] Cross every Sinnoh map boundary with **zero transition/loading screens** —
+      walk continues uninterrupted (seamless prefetch, no black frames).
 - [ ] Exact Platinum overworld HUD + start menu + every sub-menu, pixel-diff clean.
 - [ ] A wild encounter triggers the exact Platinum battle screen; a full battle
       resolves correctly on the decomp engine with Gen-4 data.
