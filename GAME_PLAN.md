@@ -245,8 +245,11 @@ per orientation — model it on **DraStic's** DS layouts:
   style), **plus on-screen GBA-style buttons** below/around them. Those buttons
   should be **styled like DraStic's** (not the current EE/GBA look) — DraStic's
   translucent d-pad + face-button aesthetic.
-- **Landscape / reverse-landscape → regular GBA-style buttons** (the standard
-  on-screen gamepad overlaying the world, like the current RPG controls).
+- **Landscape / reverse-landscape → SINGLE screen** (one screen only, NOT dual —
+  dual screen is portrait-only) with **regular GBA-style buttons** overlaying the
+  world, like the current RPG controls. The bottom/touch-screen content (menus,
+  Poketch) is surfaced another way in this mode (e.g. as an overlay), since only
+  one screen is shown.
 - **Screen-nudge buttons (port from `emulator.html`):** the ▲ / ▼ / ⌖ move-up /
   move-down / reset controls (`.emu-nudge` → `nudgeGame(±16)`) that shift the
   game screen vertically so the player can position it comfortably behind the
