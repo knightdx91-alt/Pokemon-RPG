@@ -36,10 +36,20 @@ exactly right.
    new-game intro (his narration, the Turtwig/Chimchar/Piplup era intro flow,
    name entry, gender select) — pixel- and flow-identical. This is the first
    thing the user sees, so it is the first thing we make exact.
-1. **Sinnoh first.** Get one region fully playable, in 3D with a **prominent,
-   always-available 2D toggle**, with the exact Platinum UI. This is the
-   vertical slice that proves the whole stack.
-2. Then the rest of the **first four regions**: Kanto, Johto, Hoenn.
+1. **Prove each region's map pipeline on its starting town, one at a time.**
+   Build a single starting town, get it looking *right* (3D solid at DS quality,
+   the prominent always-available 2D toggle, exact Platinum feel), sign it off,
+   then move to the next. This validates that each region's 3D-map extraction/
+   rendering path is correct before we pour effort into full regions.
+   1. **Twinleaf Town (Sinnoh)** — first. Get it looking right, then →
+   2. **New Bark Town (Johto)** — this is the one that rendered wrong before
+      (see-through buildings, sub-DS quality); getting it right here fixes the
+      known 3D bug. Then →
+   3. **Pallet Town (Kanto)** — then →
+   4. (Hoenn starting town — Littleroot — once Omega Ruby 3D assets are pulled.)
+2. **Then build out the first four regions in full**: Sinnoh, Johto, Kanto,
+   Hoenn — each with the prominent 2D/3D toggle, exact Platinum UI, seamless
+   world, USUM battles.
 3. Then regions **5–7**: Unova, Kalos, Alola.
 4. Only after single-player is exactly right: **multiplayer** + extra features.
 
@@ -261,13 +271,17 @@ the real DS**. Root-cause candidates to work through (in likely order):
   through the same rasterizer, so the pipeline is capable — New Bark's breakage
   is a per-model material/culling handling gap, not a fundamental limitation.
 
-## Milestones (Sinnoh vertical slice = Definition of Done for stage 1)
+## Milestones (in build order)
 
 - [ ] **Boot + New Game are exact Platinum FIRST** — loading screen, title
       sequence, Prof. Rowan intro, name/gender entry, flow into the world.
-- [ ] Walk a real Sinnoh map (Twinleaf/Sandgem/Route 201/Jubilife) in 3D.
-- [ ] The prominent 2D/3D toggle flips freely back and forth mid-play, no state loss.
-- [ ] 3D buildings render solid (no see-through faces) at DS-match quality.
+- [ ] **Twinleaf Town (Sinnoh)** looks right — 3D solid at DS quality, prominent
+      2D/3D toggle flips freely mid-play with no state loss, exact Platinum feel.
+      Sign off before moving on.
+- [ ] **New Bark Town (Johto)** looks right — fixes the see-through / sub-DS
+      quality bug. Sign off.
+- [ ] **Pallet Town (Kanto)** looks right. Sign off.
+- [ ] Only then: walk a full Sinnoh region seamlessly (no transition screens).
 - [ ] 2D/3D toggle button flips the same map, same position, instantly.
 - [ ] Cross every Sinnoh map boundary with **zero transition/loading screens** —
       walk continues uninterrupted (seamless prefetch, no black frames).
