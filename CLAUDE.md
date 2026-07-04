@@ -29,28 +29,36 @@ single screen + GBA buttons in landscape/reverse-landscape, plus screen-nudge
    Ruby 3D assets).
 2. Full first four regions. 3. Regions 5–7. 4. Multiplayer.
 
-## ⛔ CURRENT BLOCKER (resume point — 2026-07-04)
-**Building is gated on getting the Platinum ROM's exact title/intro art, and
-this repo-task session type has egress scoped to GitHub repos ONLY — Google
-Drive is policy-denied (proxy returns 403 for `drive.usercontent.google.com`).**
-The Drive MCP tool can't help either: it returns the 128 MB ROM as base64 into
-context (~180 MB of text), which cannot land on disk for `nds_decomp.py`.
+## ✅ BLOCKER RESOLVED (2026-07-04)
+**Drive egress now works** in this session — the Platinum ROM (US, gamecode
+**CPUE**, 128 MB) downloads fine:
+```
+curl -sSL "https://drive.usercontent.google.com/download?id=17pbLDu1VxBpO9Jf3AbWO9ZEH9O1ecVcc&export=download&confirm=t" -o /tmp/pokemon-platinum.nds
+# verified: header "POKEMON PL", bytes 12-16 == "CPUE", size == 134217728
+```
+**But we didn't need to extract from the ROM for the boot art.** The
+`pokeplatinum` decomp (cloned at `/home/user/pokeplatinum`) already ships the
+EXACT decoded title/intro assets in `res/graphics/title_screen/` — `logo.png`,
+`copyright.png`, `gf_presents.png` (all ground truth), plus the Giratina 3D
+models (`giratina*.nsbmd/.nsbca`) and the intro NARCs in
+`res/prebuilt/demo/{title,intro}/`. The boot flow/order is `titledemo.order`;
+the PRESS START string is `res/text/title_screen.json`. Prefer these decoded
+assets over re-extracting the ROM. (ROM stays ephemeral in /tmp — never commit
+ROM bytes.)
 
-**The user is updating their network-egress settings to allow Drive**, then
-starting a fresh session. When egress is fixed, the bootstrap is:
-- Platinum ROM (US, gamecode **CPUE**, 128 MB) is in the user's Google Drive:
-  - `Pokemon Platinum.nds` — Drive id `1dYedqyolx558pnkJ5NA5ywpm6MoRkVuD`
-  - `3541 - Pokemon Platinum Version (US)(XenoPhobia).nds` — id `17pbLDu1VxBpO9Jf3AbWO9ZEH9O1ecVcc`
-  ```
-  curl -sSL "https://drive.usercontent.google.com/download?id=1dYedqyolx558pnkJ5NA5ywpm6MoRkVuD&export=download&confirm=t" -o /tmp/pokemon-platinum.nds
-  # verify: header bytes 12-16 == "CPUE", size == 134217728
-  python3 /home/user/Pokemon-Game/tools/nds_decomp.py /tmp/pokemon-platinum.nds -o source/nds/CPUE
-  ```
-- Extraction is gitignored/ephemeral — commit only derived assets (never ROM bytes).
+## ✅ Step 0 — first slice built
+`index.html` + `styles.css` + `src/boot.js` render the exact power-on flow on a
+DS dual-screen stack (256×192 each, integer-scaled, nearest-neighbour):
+**GAME FREAK presents. → copyright line → title (exact Platinum logo on the
+title red) + blinking PRESS START**, advancing on Start/A/Enter/tap. Assets are
+in `assets/boot/` (cropped/cleaned from the decoded decomp PNGs). Verified with
+Playbright screenshots.
 
-**Alternative if egress still can't reach Drive:** run the extraction from a web
-session on the `Pokemon-Game` repo (Drive `curl` works there), commit the
-title/intro assets, then build the boot here on top of them.
+**Next slices of step 0 (not built yet):**
+1. Giratina 3D intro between copyright and title — port `giratina*.nsbmd/.nsbca`
+   via the `nitro_g3d` 3D pipeline (shared with the map work).
+2. Professor Rowan's new-game intro (narration, starter-era flow), then
+   name entry + gender select, then hand off into the world.
 
 ## Assets & tools to reuse (in the sibling `Pokemon-Game` repo, cloned at /home/user/Pokemon-Game)
 - **USUM battle engine + data:** `decomp/src/pml/battle/*`, `decomp/data/*`,
@@ -68,7 +76,9 @@ title/intro assets, then build the boot here on top of them.
 - **Orientation/controls:** `src/ui/layout.js` (4 orientations via body rotate),
   `src/ui/controls.js`; screen-nudge `.emu-nudge`/`nudgeGame()` in `emulator.html`.
 
-## Nothing is built in this repo yet
-Only `GAME_PLAN.md` + `README.md` + this file exist. Next session (post-egress
-fix): pull the ROM, extract the exact boot/title/intro assets, and build step 0.
-DS screen facts that are known regardless of ROM: each screen is **256×192**.
+## What's built
+- `index.html` / `styles.css` / `src/boot.js` — step 0 boot slice (see above).
+- `assets/boot/` — exact decoded Platinum boot art (gf_presents, copyright, logo).
+- `GAME_PLAN.md` + `README.md` + this file.
+
+DS screen facts: each screen is **256×192**.

@@ -1,0 +1,93 @@
+/* Pokémon RPG — boot experience (step 0).
+   DS screens are exactly 256x192. Everything is integer-scaled and
+   nearest-neighbour so the exact Platinum art stays pixel-crisp. */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  /* Prevent any smoothing on scaled pixel art. */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+/* Two 256x192 screens stacked with the DS inter-screen gap. */
+.ds {
+  --scale: 2;
+  display: flex;
+  flex-direction: column;
+  gap: calc(10px * var(--scale));
+  transform-origin: center center;
+}
+
+.screen {
+  width: calc(256px * var(--scale));
+  height: calc(192px * var(--scale));
+  position: relative;
+  background-color: #000;
+  background-repeat: no-repeat;
+  background-size: calc(256px * var(--scale)) auto;
+  image-rendering: pixelated;
+  overflow: hidden;
+}
+
+/* Boot frames. Assets are the exact decoded Platinum art. */
+
+/* "GAME FREAK presents." — 256x16 strip, centred on a black screen. */
+.screen.gf-presents {
+  background-image: url("assets/boot/gf_presents.png");
+  background-position: center center;
+}
+
+/* Copyright strip (256x16), centred on a black screen. */
+.screen.copyright {
+  background-image: url("assets/boot/copyright.png");
+  background-position: center center;
+}
+
+/* Title: exact Platinum logo on the sacred title red (matches logo.png bg). */
+.screen.title-logo {
+  background-color: #ff0000;
+  background-image: url("assets/boot/logo.png");
+  background-position: center calc(30px * var(--scale));
+}
+
+/* Title bottom (touch) screen: plain red with the PRESS START prompt. */
+.screen.title-bottom {
+  background-color: #ff0000;
+}
+
+/* "PRESS START" prompt on the bottom screen of the title. */
+.press-start {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: center;
+  color: #fff;
+  font-family: "Courier New", monospace;
+  font-weight: bold;
+  letter-spacing: calc(2px * var(--scale));
+  font-size: calc(14px * var(--scale));
+  text-shadow: calc(1px * var(--scale)) calc(1px * var(--scale)) 0 #404040;
+  animation: blink 1s steps(1, end) infinite;
+}
+
+.title-bottom .press-start { color: #fff; text-shadow: calc(1px * var(--scale)) calc(1px * var(--scale)) 0 #a00000; }
+
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Simple fade used between boot frames. */
+.fade { transition: opacity 0.5s ease; }
+.fade.hidden { opacity: 0; }
