@@ -234,6 +234,30 @@ it against the live game. Built in `Pokemon-Game` (`emulator.html` +
 - **Battle engine:** USUM (Gen-7) as-is — Gen-7 mechanics under a Platinum skin
   (see above). Add a Platinum-style Fairy type icon.
 
+## Controls & layout (DraStic-style, orientation-aware)
+
+An **orientation toggle** lets the player swap between the **4 orientations**
+(portrait, reverse-portrait, landscape, reverse-landscape). The layout changes
+per orientation — model it on **DraStic's** DS layouts:
+
+- **Portrait / reverse-portrait → dual screens, just like Platinum.** Both DS
+  screens shown (top render screen + bottom touch screen, stacked, DraStic
+  style), **plus on-screen GBA-style buttons** below/around them. Those buttons
+  should be **styled like DraStic's** (not the current EE/GBA look) — DraStic's
+  translucent d-pad + face-button aesthetic.
+- **Landscape / reverse-landscape → regular GBA-style buttons** (the standard
+  on-screen gamepad overlaying the world, like the current RPG controls).
+- **Screen-nudge buttons (port from `emulator.html`):** the ▲ / ▼ / ⌖ move-up /
+  move-down / reset controls (`.emu-nudge` → `nudgeGame(±16)`) that shift the
+  game screen vertically so the player can position it comfortably behind the
+  controls. Bring this exact feature over.
+
+The repo already has an orientation system to build on (`src/ui/layout.js` in
+Pokemon-Game: real `transform: rotate()` on `<body>` for all 4 orientations,
+plus a controls-opacity slider in landscape) and an on-screen controls layer
+(`src/ui/controls.js`). Extend these: add the dual-screen Platinum layout for
+portrait modes, restyle the buttons to DraStic's look, and add the nudge buttons.
+
 ## Open decisions to settle before the relevant stage (not blocking Sinnoh start)
 
 1. **3D fidelity target for movement/camera:** fixed DS camera angle vs. a small
