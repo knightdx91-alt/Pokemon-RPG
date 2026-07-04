@@ -46,19 +46,48 @@ the PRESS START string is `res/text/title_screen.json`. Prefer these decoded
 assets over re-extracting the ROM. (ROM stays ephemeral in /tmp — never commit
 ROM bytes.)
 
-## ✅ Step 0 — first slice built
-`index.html` + `styles.css` + `src/boot.js` render the exact power-on flow on a
-DS dual-screen stack (256×192 each, integer-scaled, nearest-neighbour):
-**GAME FREAK presents. → copyright line → title (exact Platinum logo on the
-title red) + blinking PRESS START**, advancing on Start/A/Enter/tap. Assets are
-in `assets/boot/` (cropped/cleaned from the decoded decomp PNGs). Verified with
-Playbright screenshots.
+## ⛔ EXACT-GRAPHICS RULE (learned the hard way — 2026-07-04)
+**Graphics/UI must be reconstructed from ground truth and pixel-verified —
+NEVER hand-cropped, recoloured, repositioned, or eyeballed.** (Timing/behaviour
+code may be approximated; graphics may not.) An earlier pass violated this:
+it cropped `gf_presents` by eye, blacked out "artifacts" in `copyright`, guessed
+the title red, invented the "GAME FREAK presents." centering, and put the logo
+on the wrong screen. All wrong. The correct method:
 
-**Next slices of step 0 (not built yet):**
-1. Giratina 3D intro between copyright and title — port `giratina*.nsbmd/.nsbca`
-   via the `nitro_g3d` 3D pipeline (shared with the map work).
-2. Professor Rowan's new-game intro (narration, starter-era flow), then
-   name entry + gender select, then hand off into the world.
+- The decomp ships the exact tile sheet (`*.png`), palette (`*.pal`/NCLR) and,
+  crucially, the **`*.NSCR` tilemap** that says exactly which 8×8 tile (index +
+  H/V flip + palette bank) goes at each screen cell. Reconstruct each frame by
+  placing tiles per the NSCR and applying the BG scroll from
+  `src/applications/title_screen.c`. This is deterministic and exact.
+- `tools/reconstruct_title.py` does this. Re-run it to regenerate boot frames.
+- **Verify** against the emulator heap dump (pixel-diff → 0). The user's dump is
+  in Drive: `...heap_2026-07-04T10-10-22-380Z.bin` (id
+  `1DidqjHrvqf4H1dm1dnuVXlW26Vl36pbd`, 193,331,200 bytes — the emulator's whole
+  process heap; DS palette/VRAM/OAM live inside it). `curl` it to /tmp (egress
+  works); the MCP download would base64 it into context.
+
+### Ground-truth title architecture (from title_screen.c)
+- TOP (main) screen: **Giratina** (animated 3D, BG0) + copyright line (BG1).
+- BOTTOM (sub) screen: **Pokémon Platinum logo** (BG2/3, scroll Y=1) + PRESS
+  START (BG0).
+
+## ✅ Step 0 — exact frames reconstructed
+`index.html`/`styles.css`/`src/boot.js` show the opening on a DS dual-screen
+stack: **GAME FREAK → copyright → title (logo on the BOTTOM screen)**. All three
+frames are whole 256×192 images produced by `tools/reconstruct_title.py` —
+exact, not approximated. The title top screen is left BLANK on purpose (Giratina
+3D not ported yet — not faked), and PRESS START is intentionally absent (pending
+exact extraction from the title NARC/font — not faked).
+
+**Remaining step-0 work (all from ground truth, never approximated):**
+1. Pixel-diff the reconstructed frames vs the heap dump until diff==0.
+2. Port the animated 3D Giratina (`giratina*.nsbmd/.nsbca`) for the title top.
+3. Extract the exact PRESS START graphic from the title NARC / message font.
+4. Port the title_screen.c state machine for exact frame counts/scroll/fades.
+5. Prof. Rowan's new-game intro — reconstruct the exact message box (NCLR/NCGR/
+   NSCR), the real font (`res/fonts/font_message.*` + charmap
+   `tools/msgenc/charmap.txt`), the exact naming_screen + gender select, driving
+   the unaltered dialogue in `res/text/rowan_intro.json`.
 
 ## Assets & tools to reuse (in the sibling `Pokemon-Game` repo, cloned at /home/user/Pokemon-Game)
 - **USUM battle engine + data:** `decomp/src/pml/battle/*`, `decomp/data/*`,
@@ -77,8 +106,9 @@ Playbright screenshots.
   `src/ui/controls.js`; screen-nudge `.emu-nudge`/`nudgeGame()` in `emulator.html`.
 
 ## What's built
-- `index.html` / `styles.css` / `src/boot.js` — step 0 boot slice (see above).
-- `assets/boot/` — exact decoded Platinum boot art (gf_presents, copyright, logo).
+- `tools/reconstruct_title.py` — deterministic NSCR→256×192 frame reconstructor.
+- `assets/boot/` — exact reconstructed frames (gf_presents, copyright, logo).
+- `index.html` / `styles.css` / `src/boot.js` — opening/title display.
 - `GAME_PLAN.md` + `README.md` + this file.
 
 DS screen facts: each screen is **256×192**.
