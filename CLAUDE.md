@@ -94,6 +94,15 @@ exact extraction from the title NARC/font — not faked).
   `data/pokemon/usum_*.json` (807 species, moves/learnsets/evos/etc., verified).
 - **3D map pipeline:** `tools/nitro_g3d.py` (NSBMD/BMD0 decoder), 
   `tools/render_platinum_maps.py` (rasterizer). Sinnoh maps already extracted.
+- **3D map assets, per region (`assets_3d/` in Pokemon-Game):** real ROM terrain
+  models + texture sets + placed building models, one self-contained folder per
+  region, collected by `tools/collect_region_3d.py` with a `MANIFEST.json` +
+  `ATTRIBUTION.md`. **Kanto + Johto DONE** (from HeartGold IPKE: land cells,
+  NSBTX texsets, bm_field/bm_room building models; every town render-verified).
+  Sinnoh pending (Platinum), Hoenn pending (Omega Ruby 3DS, needs a BCH
+  extractor). These are the ground-truth 3D assets for building each region's
+  world. See that repo's CLAUDE.md "3D map-asset collection" section for the
+  matrix/texset/building format facts.
 - **3D/2D toggle prototype:** `unleashed.html` (three.js `#b3d`/`#b2d`).
 - **Exact-UI pipeline:** `tools/extract_platinum_ui.py`; already-extracted exact
   assets in `src/assets/platinum/` (party_menu, bag, summary).
