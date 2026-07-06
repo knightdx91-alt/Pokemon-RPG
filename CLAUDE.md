@@ -92,8 +92,17 @@ exact extraction from the title NARC/font — not faked).
 ## Assets & tools to reuse (in the sibling `Pokemon-Game` repo, cloned at /home/user/Pokemon-Game)
 - **USUM battle engine + data:** `decomp/src/pml/battle/*`, `decomp/data/*`,
   `data/pokemon/usum_*.json` (807 species, moves/learnsets/evos/etc., verified).
-- **3D map pipeline:** `tools/nitro_g3d.py` (NSBMD/BMD0 decoder), 
-  `tools/render_platinum_maps.py` (rasterizer). Sinnoh maps already extracted.
+- **3D map pipeline (DS):** `tools/nitro_g3d.py` (NSBMD/BMD0 decoder),
+  `tools/render_platinum_maps.py` (rasterizer). Per-region 3D field assets are
+  collected under **`assets_3d/<region>/`**: **Kanto + Johto (HeartGold) and
+  Sinnoh (Platinum) are DONE** (terrain/textures/buildings, verified); see
+  `assets_3d/README.md`.
+- **3D map pipeline (3DS):** Hoenn (Omega Ruby), Kalos (X), Alola (USUM) are
+  3DS games — maps are **BCH/PICA200** models, NOT DS Nitro G3D. New decoder in
+  progress: `tools/bch.py` + `assets_3d/hoenn/RECON.md` (BCH container/header/
+  relocation/model-structure decoded; vertex format `[pos f3,normal f3,uv f2,
+  color ub4]` @36 B/vtx CONFIRMED on real ORAS bytes; remaining = index→tris +
+  ETC1 `TXOB` textures → rasterize). Kalos/Alola reuse this parser once done.
 - **3D/2D toggle prototype:** `unleashed.html` (three.js `#b3d`/`#b2d`).
 - **Exact-UI pipeline:** `tools/extract_platinum_ui.py`; already-extracted exact
   assets in `src/assets/platinum/` (party_menu, bag, summary).
